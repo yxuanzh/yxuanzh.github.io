@@ -113,9 +113,8 @@ In the paper, it also mentions it's worth trying to replace score matching with 
 #### BLIP3-o
 
 - Encoder: CLIP
-- Decoder: diffusion transformer decoder trained with flow matching. Causal attention; during generation training the understanding task is frozen.
+- Decoder: flow matching based DLM
 - Base: QWen2.5-VL.
-- Comment: Unified via diffusion decoder; more fully integrated transfusion-style architectures are a natural evolution.
 
 ![blip3o](image.png)
 
