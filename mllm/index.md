@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Deep understanding about diffusion models
+title: Summary: Unified Multimodal Generation & Understanding
 ---
 
 ## Summary: Unified Multimodal Generation & Understanding (2025.09)
@@ -13,7 +13,7 @@ Current VLM approaches follow three main paths:
 
    - This approach designs a codebook for images and uses the code vectors to represent image patches. This creates a "visual embedding" analogous to "word embeddings," discretizing image tokens. Doing so makes images and language easier to integrate in LLMs.
 
-   - However, the codebook reduces the information entropy from a continuous visual space to codebook entropy $$K\log{V}$$, where $$K$$ is the code dimensionality and $$V$$ is the vocabulary size. This approach scales poorly, especially in character‑intensive tasks (e.g., OCR).
+   - However, the codebook reduces the information entropy from infinity (a continuous visual space) to codebook entropy $$K\log{V}$$, where $$K$$ is the code dimensionality and $$V$$ is the vocabulary size. This approach scales poorly, especially in character‑intensive tasks (e.g., OCR).
 
 2. External diffusion model
 
@@ -26,8 +26,9 @@ Current VLM approaches follow three main paths:
    - Some methods therefore integrate diffusion directly into the backbone transformer, so the same model handles both language and image generation.
    
    
-      - When generating text, the LLM uses a causal attention mask and next‑token prediction. When generating images, the model predicts Gaussian noise (score matching) or a velocity field (flow matching) to progressively denoise the image; the denoised output is then fed back as input for the next step.
+   - When generating text, the LLM uses a causal attention mask and next‑token prediction. When generating images, the model applies bidirectional attention and predicts Gaussian noise (score matching) or a velocity field (flow matching) to progressively denoise the image; the denoised output is then fed back as input for the next round of diffusion (see Fig below).
    
+   ![image-20250922100003571](image9.png)
 
 
 
@@ -41,17 +42,17 @@ Additionally, due to the distinct requirements of image understanding (semantic 
 
 Below is a summary of the main SOTA models from this year and last year.
 
-| Method | Encoder(s) | Decoder(s) | Base model | Diffusion (score/flow/No) | Diffusion native/extra DLM |
-|--------|------------|------------|------------|---------------------------|----------------------------|
-| [Transfusion](https://arxiv.org/html/2408.11039v1) | VAE/VAE+UNet | VAE/VAE+UNet | Transformer | Score matching | Native |
-| [Show-o](https://arxiv.org/pdf/2408.12528) | Image vector discretization | Discrete diffusion | Transformer | discrete score matching | Native |
-| [Show-o2](https://arxiv.org/pdf/2506.15564) | Pixel: 3D causal VAE<br/>Semantic: SigLIP | 3D causal VAE | QWen2.5 VL | flow matching | Native |
-| [BLIP3-o](https://arxiv.org/pdf/2505.09568) | CLIP | DLM | QWen2.5-VL | flow matching | DLM |
-| [BAGEL](https://arxiv.org/pdf/2505.14683) | Pixel: VAE;<br/>Semantic: SigLIP2 | Integrated MoT with image/text experts | QWen2.5 LLM | flow matching | Native |
+| Method | Publish Date | Encoder(s) | Decoder(s) | Base model | Diffusion (score/flow/No) | Diffusion native/extra DLM |
+|--------|-------------|------------|------------|------------|---------------------------|----------------------------|
+| [Transfusion](https://arxiv.org/html/2408.11039v1) | 2024.08 | VAE/VAE+UNet | VAE/VAE+UNet | Transformer | Score matching | Native |
+| [Show-o](https://arxiv.org/pdf/2408.12528) | 2024.08 | Image vector discretization | Discrete diffusion | Transformer | discrete score matching | Native |
+| [Show-o2](https://arxiv.org/pdf/2506.15564) | 2025.06 | Pixel: 3D causal VAE<br/>Semantic: SigLIP | 3D causal VAE | QWen2.5 VL | flow matching | Native |
+| [BLIP3-o](https://arxiv.org/pdf/2505.09568) | 2025.05 | CLIP | DLM | QWen2.5-VL | flow matching | DLM |
+| [BAGEL](https://arxiv.org/pdf/2505.14683) | 2025.05 | Pixel: VAE;<br/>Semantic: SigLIP2 | direct logits | QWen2.5 LLM | flow matching | Native |
 
 Notes
 - “score” refers to DDPM-style score matching; “flow” refers to flow matching methods.
-- “extra DLM” denotes that image generation uses a separate diffusion language model as a decoder, v.s. the backbone model natively support diffusion task.
+- “extra DLM” denotes that image generation uses a separate diffusion language model as a decoder, v.s. the backbone model natively support diffusion task (noise/velocity field prediction).
 
 ### 3. Current trends
 
@@ -97,7 +98,7 @@ Notes
 
 Encoder: ViT
 
-LLaVA doesn't have image generation capability so strictly speaking it's not a omni mutli-modal model.
+LLaVA doesn't have image generation capability so strictly speaking it's not an omni mutli-modal model.
 
 ![fig8](image8.jpg)
 
@@ -145,11 +146,12 @@ In the paper, it also mentions it's worth trying to replace score matching with 
 
 ![showo2](image2.png)
 
-#### BAGEL (2025.05)
+#### BAGEL
 
 - [Homepage](https://bagel-ai.org/)
 - [Paper (arXiv:2505.14683)](https://arxiv.org/pdf/2505.14683)
 - [Code](https://github.com/ByteDance-Seed/Bagel/tree/main)
+
 
 - **Encoder:**  
   - Pixel encoder: VAE encodes images into latent representations.  
