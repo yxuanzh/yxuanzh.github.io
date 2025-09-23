@@ -10,7 +10,10 @@ Prerequisite: understand flow matching models (see [Deep understanding about dif
 
 
 
-Paper link: https://arxiv.org/pdf/2505.13447
+Paper link: [https://arxiv.org/pdf/2505.13447](https://arxiv.org/pdf/2505.13447)
+
+
+
 This paper is marked as NeurIPS Oral these days. This is another impressive contribution from Kaiming's team. This paper proposes replacing the instantaneous velocity field with an average velocity, enabling one-step ODE-based generation.
 
 
@@ -31,7 +34,7 @@ $$u(z_t, r, t)=\frac{1}{t-r}\int_{r}^{t}v(z_\tau, \tau)d\tau \tag{1}$$
 
 which is an average velocity over time dimension. Here $v(z_\tau, \tau)$ is the instantaneous velocity, $u(z_t, r, t)$ represents the average velocity from time $r$ to time $t$, with destination as $z_t$.
 
-However, it is intractable to directly learn $$\left \lVert u_{\theta}(z_t, r, t) - u(z_t, r, t) \right \rVert$$ from Eq.(1), primarily because computing integrals over functions is much more challenging than working with derivatives. **The key contribution of this paper is to rewrite Eq.(1) in a differential form (Eq.(7)), making it feasible to train a one-step model $u_\theta(z_t, r, t)$ very precisely.**
+However, it is intractable to directly learn $$\left \lVert u_{\theta}(z_t, r, t) - u(z_t, r, t) \right \rVert_2^2$$ from Eq.(1), primarily because computing integrals over functions is much more challenging than working with derivatives. **The key contribution of this paper is to rewrite Eq.(1) in a differential form (Eq.(7)), making it feasible to train a one-step model $u_\theta(z_t, r, t)$ very precisely.**
 
 
 
@@ -52,10 +55,10 @@ According to the chain rule, the derivative of $u(z_t, r, t)$ with respect to $t
 $$\frac{\partial}{\partial t}u(z_t,r,t) = \frac{\partial u}{\partial z_t}\frac{\partial z_t}{\partial t} + \frac{\partial u}{\partial r}\frac{\partial r}{\partial t} + \frac{\partial u}{\partial t} \tag{3}$$
 
 Substituting Eq.(3) with:
-$$\frac{d z_t}{dt}=v(z_t,t),\quad \frac{d r}{dt}=0$$
+$$\frac{\partial z_t}{\partial t}=v(z_t,t),\quad \frac{\partial r}{\partial t}=0$$
 we get:
 
-$$\frac{d}{dt}u(z_t,r,t)=\frac{\partial u}{\partial z_t} v(z_t,t)+\frac{\partial u}{\partial t} \tag{4}$$
+$$\frac{\partial}{\partial t}u(z_t,r,t)=\frac{\partial u}{\partial z_t} v(z_t,t)+\frac{\partial u}{\partial t} \tag{4}$$
 
 Next, we will compute $\frac{\partial u}{\partial t}$ from Eq.(2).
 
@@ -114,7 +117,7 @@ $$\underset{\theta}{\text{argmin}} \left \lVert u_{\theta}(z_t, r, t) - SG(u_{tg
 In general, computing $$\frac{\partial}{\partial t}u(z_t, r, t)$$ directly involves evaluating the full Jacobian matrix, which is computationally expensive. A common strategy to mitigate this cost is to reformulate the computation as a Jacobian-Vector Product (JVP), allowing us to compute only the necessary directional derivatives rather than the entire Jacobian. This approach, also employed in Sliced Score Matching (SSM), significantly reduces computational complexity.
 
 To achieve this, we leverage Eq.(4): 
-$$\frac{d}{dt}u(z_t, r, t) = \frac{\partial u}{\partial z_t} v(z_t, t) + \frac{\partial u}{\partial t}.$$
+$$\frac{\partial}{\partial t}u(z_t, r, t) = \frac{\partial u}{\partial z_t} v(z_t, t) + \frac{\partial u}{\partial t}.$$
 Here, the term $$\frac{\partial u}{\partial z_t} v(z_t, t)$$ can be efficiently computed using JVP operations (e.g., `torch.func.jvp` or `jax.jvp`), while $$\frac{\partial u}{\partial t}$$ can be obtained directly and efficiently.
 
 
